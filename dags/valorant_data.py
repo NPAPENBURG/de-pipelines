@@ -1,12 +1,14 @@
 """DAG CREATED TO GATHER MULTIPLE DIFFERENT TYPES OF VALORANT DATA FOR EACH PLAYER"""
 from airflow import DAG
-from airflow.hooks.base import BaseHook
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from datetime import datetime
 
+from helpers.val_helpers import clean_valorant_data
 
-PLAYERS = [{'username': 'AnimeWatcher', 'tag': 'BP3', 'region': 'NA'}]
+PLAYERS = [{'username': 'animewatcher', 'tag': 'bp3', 'region': 'na'},
+           {'username': 'zomama3k', 'tag': 'mama', 'region': 'na'}]
 
 with DAG(
         dag_id='Valorant_Data_Pipeline',
@@ -27,17 +29,17 @@ with DAG(
     )
 
     for player in PLAYERS:
-
-        conn_id = 'valorant'
-        http_conn = BaseHook.get_connection(conn_id)
-        api_key = http_conn.extra_dejson.get('Authorization')
-
         extract_data = SimpleHttpOperator(
-            task_id=f"extra_{player['username']}_data",
+            task_id=f"extract_{player['username']}_data",
             method='GET',
             http_conn_id='valorant',
-            endpoint=f"valorant/v1/lifetime/matches/{player['region']}/{player['username']}/{player['tag']}?page=1&size=10",
-            headers={'Authorization': api_key}
+            endpoint=f"valorant/v1/lifetime/matches/{player['region']}/{player['username']}/{player['tag']}?page=1&size=10"
         )
 
-        start >> extract_data >> end
+        clean_data = PythonOperator(
+            task_id=f"clean_{player['username']}_data",
+            python_callable=clean_valorant_data,
+            op_kwargs={'task_id': f"extract_{player['username']}_data"}
+        )
+
+        start >> extract_data >> clean_data >> end
