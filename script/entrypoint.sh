@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Source environment variables
+if [ -f ".env" ]; then
+  source .env
+fi
+
 # Upgrade pip and install requirements if the requirements file exists
 if [ -e "/opt/airflow/requirements.txt" ]; then
   python -m pip install --upgrade pip
@@ -25,3 +30,4 @@ airflow db upgrade
 
 # Start the Airflow webserver
 exec airflow webserver
+
