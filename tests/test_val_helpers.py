@@ -14,15 +14,13 @@ class TestCleanValorantData:
         mock_ti.xcom_pull.return_value = json.dumps(mock_player_data)
 
         # Call the function with the mock objects
-        clean_valorant_data(ti=mock_ti, task_id='extract_AnimeWatcher_data')
-
-        # Get the pushed cleaned data
-        cleaned_data = mock_ti.xcom_push.call_args[1]['value']
+        cleaned_data = clean_valorant_data(mock_ti, 'extract_animewatcher_data', 'animewatcher')
 
         # Check that the cleaned data matches expected structure and values
         assert len(cleaned_data) == len(mock_player_data['data'])
         for match, cleaned_match in zip(mock_player_data['data'], cleaned_data):
             assert cleaned_match['match_id'] == match['meta']['id']
+            assert cleaned_match['player'] == 'animewatcher'  # Check the 'player' field
             assert cleaned_match['map_name'] == match['meta']['map']['name']
             assert cleaned_match['game_mode'] == match['meta']['mode']
             assert cleaned_match['start_time'] == match['meta']['started_at']
@@ -44,5 +42,3 @@ class TestCleanValorantData:
             assert cleaned_match['damage_received'] == match['stats']['damage']['received']
             assert cleaned_match['team_red_score'] == match['teams']['red']
             assert cleaned_match['team_blue_score'] == match['teams']['blue']
-
-        mock_ti.xcom_push.assert_called_once_with(key='cleaned_data', value=cleaned_data)

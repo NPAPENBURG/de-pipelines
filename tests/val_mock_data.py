@@ -1,8 +1,8 @@
 # Sample XCom data to be returned by the mock
 mock_player_data = {
     "status": 200,
-    "name": "AnimeWatcher",
-    "tag": "BP3",
+    "name": "animewatcher",
+    "tag": "bp3",
     "results": {
         "total": 64,
         "returned": 10,
