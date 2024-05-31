@@ -2,7 +2,22 @@ import json
 import logging
 
 
-def clean_valorant_data(ti, task_id):
+def clean_valorant_data(ti, task_id, player):
+    """
+    Clean and transform Valorant match data for a specific player.
+
+    This function pulls raw data from an XCom, processes it to extract relevant information,
+    and transforms it into a cleaned format suitable for insertion into a database.
+
+    :param ti: Task instance from which to pull the XCom result.
+    :type ti: TaskInstance
+    :param task_id: The task ID from which to pull the XCom result.
+    :type task_id: str
+    :param player: The username of the player for whom the data is being processed.
+    :type player: str
+    :return: A list of dictionaries containing cleaned match data.
+    :rtype: list
+    """
     # Pull the XCom result from the specified task
     xcom_result = ti.xcom_pull(task_ids=task_id)
 
@@ -12,13 +27,17 @@ def clean_valorant_data(ti, task_id):
     if xcom_result is None:
         raise ValueError(f"No data found from {task_id} task")
 
+    # Parse the JSON data
     data = json.loads(xcom_result)
 
+    # List to store cleaned data
     cleaned_data = []
-    for match in data['data']:
 
+    # Process each match in the data
+    for match in data['data']:
         match_info = {
             'match_id': match['meta']['id'],
+            'player': player,
             'map_name': match['meta']['map']['name'],
             'game_mode': match['meta']['mode'],
             'start_time': match['meta']['started_at'],
@@ -43,5 +62,6 @@ def clean_valorant_data(ti, task_id):
         }
         cleaned_data.append(match_info)
 
-    # Optionally, you can push the cleaned data to XCom for further tasks
-    ti.xcom_push(key='cleaned_data', value=cleaned_data)
+    # Return the cleaned data
+    return cleaned_data
+
