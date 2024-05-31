@@ -105,13 +105,14 @@ services:
   webserver:
     image: apache/airflow:2.6.0-python3.9
     command: webserver
-    entrypoint: ['/opt/airflow/script/entrypoint.sh']
+    entrypoint: [ '/opt/airflow/script/entrypoint.sh' ]
     depends_on:
       - postgres
     environment:
       - LOAD_EX=n
       - EXECUTOR=Sequential
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__WEBSERVER__SECRET_KEY=my_secret_key # Add this line
     logging:
       options:
         max-size: 10m
@@ -120,10 +121,11 @@ services:
       - ./dags:/opt/airflow/dags
       - ./script/entrypoint.sh:/opt/airflow/script/entrypoint.sh
       - ./requirements.txt:/opt/airflow/requirements.txt
+      - ./connections.yaml:/opt/airflow/connections.yaml
     ports:
       - "8080:8080"
     healthcheck:
-      test: ['CMD-SHELL', "[ -f /opt/airflow/airflow-webserver.pid ]"]
+      test: [ 'CMD-SHELL', "[ -f /opt/airflow/airflow-webserver.pid ]" ]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -139,10 +141,12 @@ services:
       - ./dags:/opt/airflow/dags
       - ./script/entrypoint.sh:/opt/airflow/script/entrypoint.sh
       - ./requirements.txt:/opt/airflow/requirements.txt
+      - ./connections.yaml:/opt/airflow/connections.yaml
     environment:
       - LOAD_EX=n
       - EXECUTOR=Sequential
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__WEBSERVER__SECRET_KEY=my_secret_key # Add this line
     command: bash -c "pip install -r ./requirements.txt && airflow db upgrade && airflow scheduler"
     networks:
       - confluent

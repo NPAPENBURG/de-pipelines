@@ -1,18 +1,18 @@
-from airflow import DAG
+"""
+DAG to Create Airflow Connections from a YAML File
 
-from datetime import datetime
-
+This DAG reads connection details from a `connections.yaml` file (not included due to containing sensitive information)
+and adds them to the Airflow database as connections.
+"""
+import os
 import yaml
+
+from airflow import DAG
+from datetime import datetime
 from airflow import settings
 from airflow.models import Connection
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
-
-default_args = {
-    'owner': 'airflow',
-    'start_date': datetime(2024, 5, 30),
-    'retries': 1,
-}
 
 
 def create_connections_from_yaml(yaml_file):
@@ -35,6 +35,10 @@ def create_connections_from_yaml(yaml_file):
         session.commit()
 
 
+dag_directory = os.path.dirname(os.path.abspath(__file__))
+parent_directory = os.path.abspath(os.path.join(dag_directory, os.pardir))
+yaml_file_path = os.path.join(parent_directory, 'connections.yaml')
+
 with DAG(
         dag_id='import_connections',
         concurrency=1,
@@ -42,7 +46,6 @@ with DAG(
         start_date=datetime(2023, 5, 30),
         catchup=False,
         max_active_runs=1,
-        orientation='LR',
 ) as dag:
     start = EmptyOperator(
         task_id='start'
@@ -55,7 +58,7 @@ with DAG(
     create_connections = PythonOperator(
         task_id='create_connections_task',
         python_callable=create_connections_from_yaml,
-        op_kwargs={'yaml_file': 'connections.yaml'},
+        op_kwargs={'yaml_file': yaml_file_path},
         dag=dag,
     )
 
