@@ -25,7 +25,7 @@ PLAYERS = [{'username': 'animewatcher', 'tag': 'bp3', 'region': 'na'},
            {'username': 'puckgoat', 'tag': 'bardo', 'region': 'na'}]
 
 with DAG(
-        dag_id='Valorant_Data_Pipeline',
+        dag_id='ingest_valorant_player_data',
         concurrency=2,
         schedule_interval='0 */4 * * *',
         start_date=datetime(2023, 5, 30),
