@@ -20,9 +20,9 @@ yaml_file_path = os.path.join(parent_directory, 'connections.yaml')
 with DAG(
         dag_id='import_connections',
         concurrency=1,
-        schedule_interval=None,
+        schedule_interval='0 0 * * *',
         start_date=datetime(2023, 5, 30),
-        catchup=True,
+        catchup=False,
         max_active_runs=1,
 ) as dag:
     start = EmptyOperator(
