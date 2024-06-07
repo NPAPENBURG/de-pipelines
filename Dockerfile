@@ -1,4 +1,4 @@
-# Use the official Apache Airflow image as the base image
+# Base image for Airflow
 FROM apache/airflow:2.9.1
 
 # Copy the requirements.txt file to the image

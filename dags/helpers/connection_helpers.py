@@ -24,7 +24,7 @@ def create_connections_from_yaml(yaml_file):
         if existing_conn:
             # If connection already exists, update its parameters
             existing_conn.conn_type = connection_params['conn_type']
-            existing_conn.host = connection_params['host']
+            existing_conn.host = connection_params.get('host', None)
             existing_conn.login = connection_params.get('login', None)
             existing_conn.password = connection_params.get('password', None)
             existing_conn.schema = connection_params.get('schema', None)
@@ -35,7 +35,7 @@ def create_connections_from_yaml(yaml_file):
             new_conn = Connection(
                 conn_id=connection_name,
                 conn_type=connection_params['conn_type'],
-                host=connection_params['host'],
+                host=connection_params.get('host', None),
                 login=connection_params.get('login', None),
                 password=connection_params.get('password', None),
                 schema=connection_params.get('schema', None),
